@@ -1,0 +1,58 @@
+[project]
+name = "abraham"
+version = "0.1.0"
+description = "Split songs into stems, then mix, transpose and study them as sheet music or guitar tab"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "demucs==4.0.1",
+    "soundfile>=0.12",
+    "numpy<2",
+    "imageio-ffmpeg>=0.5",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "python-multipart>=0.0.9",
+    "yt-dlp[default,deno]>=2026.10.26",
+    "pedalboard>=0.9.26",
+    "onnxruntime>=1.18; sys_platform != 'darwin'",
+    "onnxruntime>=1.18,<1.20; sys_platform == 'darwin'",  # newer ones dropped Intel Macs and macOS before 14
+]
+
+# Pick exactly one (setup.sh / setup.bat choose for you):
+#   cpu  - CPU everywhere; on Apple Silicon Macs this build also uses the Metal GPU.
+#   cuda - NVIDIA GPUs on Windows/Linux.
+# Intel Macs are stuck on torch 2.2.x, the last release with macOS x86_64 wheels.
+[project.optional-dependencies]
+cpu = [
+    "torch==2.5.1; sys_platform != 'darwin' or platform_machine == 'arm64'",
+    "torchaudio==2.5.1; sys_platform != 'darwin' or platform_machine == 'arm64'",
+    "torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "torchaudio==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]
+cuda = [
+    "torch==2.5.1; sys_platform != 'darwin'",
+    "torchaudio==2.5.1; sys_platform != 'darwin'",
+]
+
+[tool.uv]
+package = false
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'" },
+    { index = "pytorch-cu121", extra = "cuda", marker = "sys_platform != 'darwin'" },
+]
+torchaudio = [
+    { index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'" },
+    { index = "pytorch-cu121", extra = "cuda", marker = "sys_platform != 'darwin'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
