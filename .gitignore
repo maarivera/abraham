@@ -1,0 +1,7 @@
+.venv/
+output/
+library/
+downloads/
+__pycache__/
+dist/
+/*.jpg
