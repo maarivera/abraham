@@ -1,0 +1,214 @@
+/* Themes. Each one only sets custom properties, and sets all of them, so the same selector
+   also styles its preview card in Settings whatever the active theme is. */
+
+@font-face { font-family: "Inter"; font-weight: 400 800; font-display: swap; src: url(fonts/inter-latin.woff2) format("woff2"); }
+@font-face { font-family: "Share Tech Mono"; font-display: swap; src: url(fonts/share-tech-mono-latin.woff2) format("woff2"); }
+@font-face { font-family: "Orbitron"; font-weight: 500 700; font-display: swap; src: url(fonts/orbitron.woff2) format("woff2"); }
+@font-face { font-family: "Press Start 2P"; font-display: swap; src: url(fonts/press-start-2p.woff2) format("woff2"); }
+@font-face { font-family: "VT323"; font-display: swap; size-adjust: 135%; src: url(fonts/vt323-latin.woff2) format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 500 700; font-display: swap; src: url(fonts/cinzel.woff2) format("woff2"); }
+
+[data-theme="abraham"] {
+  --bg: #0c0e13; --panel: #13161e; --panel-2: #1a1e29; --panel-3: #222736; --border: #252a38;
+  --text: #e9ebf1; --muted: #868ca0; --accent: #36e2b4; --accent-ink: #052119; --danger: #ff5c6c; --wave-off: #3a3f4f; --wave-dim: 59;
+  --radius: 12px; --pill: 999px;
+  --font-ui: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; --font-head: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg-img: none; --panel-img: none; --scan: 0; --text-glow: none; --caps: none;
+  color-scheme: dark;
+}
+
+[data-theme="pipboy"] {
+  --bg: #020b06; --panel: #03140b; --panel-2: #06231a; --panel-3: #0a3322; --border: #0e4d2c;
+  --text: #6cf5ab; --muted: #2fa068; --accent: #2bff88; --accent-ink: #012a12; --danger: #ffb000; --wave-off: #0e4d2c; --wave-dim: 59;
+  --radius: 8px; --pill: 8px;
+  --font-ui: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace; --font-head: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+  --bg-img: radial-gradient(1100px 520px at 50% -8%, #06301a 0%, transparent 70%); --panel-img: none;
+  --scan: .35; --text-glow: 0 0 8px rgba(43, 255, 136, .55); --caps: uppercase;
+  color-scheme: dark;
+}
+
+[data-theme="sakura"] {
+  --bg: #12060c; --panel: #1b0a13; --panel-2: #2b0f1f; --panel-3: #3d1530; --border: #6a2447;
+  --text: #ffc4de; --muted: #cc6f9a; --accent: #ff8fc2; --accent-ink: #3a0620; --danger: #ffb454; --wave-off: #6a2447; --wave-dim: 59;
+  --radius: 8px; --pill: 8px;
+  --font-ui: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace; --font-head: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+  --bg-img: radial-gradient(1100px 520px at 50% -8%, #3d0f27 0%, transparent 70%); --panel-img: none;
+  --scan: .3; --text-glow: 0 0 8px rgba(255, 126, 182, .5); --caps: uppercase;
+  color-scheme: dark;
+}
+
+[data-theme="sky"] {
+  --bg: #e4f3ff; --panel: #f6fbff; --panel-2: #dcefff; --panel-3: #c6e3f7; --border: #a9d3ee;
+  --text: #0b3556; --muted: #46748f; --accent: #0677c4; --accent-ink: #ffffff; --danger: #c7354a; --wave-off: #c6e3f7; --wave-dim: b8;
+  --radius: 8px; --pill: 8px;
+  --font-ui: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace; --font-head: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+  --bg-img: radial-gradient(1000px 520px at 50% -10%, #ffffff 0%, transparent 70%); --panel-img: none;
+  --scan: 0; --text-glow: none; --caps: uppercase;
+  color-scheme: light;
+}
+
+[data-theme="neon"] {
+  --bg: #0a0217; --panel: rgba(20, 5, 48, .82); --panel-2: rgba(44, 8, 90, .75); --panel-3: #3a1272; --border: #5a22a8;
+  --text: #f1e2ff; --muted: #b391f0; --accent: #ff45dd; --accent-ink: #1a0333; --danger: #ffd21a; --wave-off: #5a22a8; --wave-dim: 59;
+  --radius: 4px; --pill: 4px;
+  --font-ui: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace; --font-head: "Orbitron", "Share Tech Mono", sans-serif;
+  --bg-img: radial-gradient(900px 500px at 50% 115%, #6a0fb8 0%, transparent 65%), linear-gradient(#0a0217, #170541 70%); --panel-img: none;
+  --scan: .28; --text-glow: 0 0 10px rgba(255, 69, 221, .6); --caps: uppercase;
+  color-scheme: dark;
+}
+
+[data-theme="paper"] {
+  --bg: #efe6d1; --panel: #f8f1de; --panel-2: #efe4c9; --panel-3: #e0d3b5; --border: #d4c8ae;
+  --text: #2b2013; --muted: #5a4a34; --accent: #a1332c; --accent-ink: #fff8ea; --danger: #a1332c; --wave-off: #e0d3b5; --wave-dim: b8;
+  --radius: 8px; --pill: 8px;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif; --font-head: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --bg-img: repeating-linear-gradient(transparent 0 27px, rgba(60, 40, 20, .07) 27px 28px); --panel-img: none;
+  --scan: 0; --text-glow: none; --caps: none;
+  color-scheme: light;
+}
+
+[data-theme="terminal"] {
+  --bg: #000000; --panel: #070707; --panel-2: #0f0f0f; --panel-3: #1f1f1f; --border: #2a2a2a;
+  --text: #d7d7d7; --muted: #8a8a8a; --accent: #f28c00; --accent-ink: #000000; --danger: #ff4d4f; --wave-off: #3a3a3a; --wave-dim: 59;
+  --radius: 2px; --pill: 2px;
+  --font-ui: ui-monospace, Menlo, Consolas, monospace; --font-head: ui-monospace, Menlo, Consolas, monospace;
+  --bg-img: none; --panel-img: none; --scan: 0; --text-glow: none; --caps: uppercase;
+  color-scheme: dark;
+}
+
+[data-theme="bright"] {
+  --bg: #f4f3ef; --panel: #ffffff; --panel-2: #f7f6f2; --panel-3: #e4e2dc; --border: #e4e2dc;
+  --text: #1b1b1b; --muted: #5a5a5a; --accent: #e07400; --accent-ink: #000000; --danger: #d42a2d; --wave-off: #dedbd3; --wave-dim: b8;
+  --radius: 8px; --pill: 8px;
+  --font-ui: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; --font-head: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg-img: none; --panel-img: none; --scan: 0; --text-glow: none; --caps: none;
+  color-scheme: light;
+}
+
+[data-theme="pipboy-bw"] {
+  --bg: #050505; --panel: #0d0d0d; --panel-2: #171717; --panel-3: #262626; --border: #3d3d3d;
+  --text: #e8e8e8; --muted: #8f8f8f; --accent: #ffffff; --accent-ink: #000000; --danger: #b5b5b5; --wave-off: #3d3d3d; --wave-dim: 59;
+  --radius: 0px; --pill: 0px;
+  --font-ui: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace; --font-head: "Share Tech Mono", ui-monospace, Menlo, Consolas, monospace;
+  --bg-img: none; --panel-img: none;
+  --scan: .3; --text-glow: 0 0 6px rgba(232, 232, 232, .35); --caps: uppercase;
+  color-scheme: dark;
+}
+
+[data-theme="palace"] {
+  --bg: #14100b; --panel: rgba(34, 27, 19, .92); --panel-2: #33261a; --panel-3: #4a3620; --border: #6a4a22;
+  --text: #f4ead0; --muted: #bfae8c; --accent: #e8bd55; --accent-ink: #2a1a06; --danger: #ff7a5c; --wave-off: #54402a; --wave-dim: 59;
+  --radius: 10px; --pill: 999px;
+  --font-ui: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; --font-head: "Cinzel", Georgia, serif;
+  --bg-img:
+    radial-gradient(760px 760px at 62% -6%, transparent 62%, rgba(232, 189, 85, .13) 62.4% 62.8%, transparent 63.2%),
+    radial-gradient(640px 640px at 62% -6%, transparent 62%, rgba(232, 189, 85, .09) 62.4% 62.8%, transparent 63.2%),
+    radial-gradient(620px 360px at 62% -8%, rgba(191, 199, 182, .3), transparent 72%),
+    radial-gradient(1100px 500px at 50% 112%, rgba(214, 158, 46, .3), transparent 70%),
+    linear-gradient(#1b1610, #0f0c08);
+  --metal: linear-gradient(160deg, #fbe9a8, #e8bd55 45%, #a8701f); --metal-ink: #2a1a06;
+  --metal-text: linear-gradient(180deg, #fff1b8, #e8bd55 55%, #b67d27);
+  --metal-glow: 0 0 14px rgba(232, 189, 85, .28), inset 0 1px 0 rgba(255, 246, 208, .7);
+  --gilt-edge: inset 0 0 0 3px rgba(20, 16, 11, .9), inset 0 0 0 4px rgba(232, 189, 85, .24);
+  --panel-img: none; --scan: 0; --text-glow: 0 0 10px rgba(232, 189, 85, .16); --caps: none;
+  color-scheme: dark;
+}
+
+[data-theme="goldleaf"] {
+  --bg: #f1ece2; --panel: rgba(249, 246, 240, .9); --panel-2: #ede6d6; --panel-3: #e0cfab; --border: #dcc99e;
+  --text: #33260f; --muted: #6e5730; --accent: #8a6420; --accent-ink: #fffaf0; --danger: #b3261e; --wave-off: #e2d8c6; --wave-dim: b8;
+  --radius: 10px; --pill: 999px;
+  --font-ui: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; --font-head: "Cinzel", Georgia, serif;
+  --metal: linear-gradient(160deg, #f6e6ae, #d4af5f 48%, #a67c35); --metal-ink: #2e2108;
+  --metal-text: linear-gradient(180deg, #b58a35, #8a6420 55%, #6a4a14);
+  --metal-glow: 0 2px 8px rgba(155, 122, 73, .35), inset 0 1px 0 rgba(255, 250, 225, .8);
+  --gilt-edge: inset 0 0 0 3px rgba(249, 246, 240, .95), inset 0 0 0 4px rgba(185, 146, 70, .35);
+  --bg-img:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000' preserveAspectRatio='xMidYMid slice'><g fill='none' stroke='%23c9a24f' stroke-linecap='round'><path stroke-width='2.2' opacity='.5' d='M-20 330C140 250 240 300 360 310S560 250 700 190 860 60 900-20'/><path stroke-width='1.2' opacity='.45' d='M-20 370C120 300 250 340 380 345S600 290 730 230 900 120 1020 60'/><path stroke-width='2.4' opacity='.5' d='M300 1020C380 900 470 880 560 800S760 700 860 690 980 640 1020 610'/><path stroke-width='1.2' opacity='.4' d='M380 1020C450 930 560 900 640 840S800 760 1020 730'/><path stroke-width='2' opacity='.45' d='M-10 640C40 700 70 770 40 840S-10 930-20 950'/><path stroke-width='1.6' opacity='.4' d='M960 40C900 110 910 200 950 270S1000 360 1020 400'/></g></svg>"),
+    radial-gradient(420px 240px at 78% 22%, rgba(212, 175, 95, .3), transparent 70%),
+    radial-gradient(420px 260px at 12% 72%, rgba(212, 175, 95, .24), transparent 70%),
+    linear-gradient(135deg, #f9f6f0, #ebe7dc);
+  --panel-img: none; --scan: 0; --text-glow: none; --caps: none;
+  background-size: cover; /* one sheet of marble, not a tiled one */
+  color-scheme: light;
+}
+
+[data-theme="arcade"] {
+  --bg: #0a0824; --panel: rgba(16, 12, 52, .94); --panel-2: #1d1660; --panel-3: #33278a; --border: #4a35c4;
+  --text: #f4f0ff; --muted: #b6adea; --accent: #ff4fd8; --accent-ink: #14042e; --danger: #ffd166; --wave-off: #33278a; --wave-dim: 66;
+  --radius: 0px; --pill: 0px;
+  --font-ui: "VT323", "Share Tech Mono", ui-monospace, monospace; --font-head: "Press Start 2P", "VT323", monospace;
+  --bg-img:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='320' shape-rendering='crispEdges'><rect x='264' y='280' width='4' height='4' fill='%239b7bff'/><rect x='184' y='104' width='4' height='4' fill='%239b7bff'/><rect x='264' y='276' width='4' height='4' fill='%239b7bff'/><rect x='144' y='224' width='6' height='6' fill='%23ffd166'/><rect x='240' y='160' width='2' height='2' fill='%23ffd166'/><rect x='80' y='132' width='4' height='4' fill='%23ffd166'/><rect x='12' y='204' width='6' height='6' fill='%23ff4fd8'/><rect x='80' y='100' width='4' height='4' fill='%23ffd166'/><rect x='84' y='4' width='4' height='4' fill='%239b7bff'/><rect x='136' y='132' width='4' height='4' fill='%23ffffff'/><rect x='288' y='148' width='2' height='2' fill='%239b7bff'/><rect x='56' y='312' width='4' height='4' fill='%239b7bff'/><rect x='144' y='156' width='2' height='2' fill='%23ffffff'/><rect x='404' y='308' width='2' height='2' fill='%239b7bff'/><rect x='412' y='172' width='6' height='6' fill='%2338c8ff'/><rect x='72' y='80' width='4' height='4' fill='%23ffffff'/><rect x='180' y='224' width='2' height='2' fill='%23ff4fd8'/><rect x='204' y='168' width='6' height='6' fill='%239b7bff'/><rect x='20' y='40' width='6' height='6' fill='%23ffffff'/><rect x='48' y='152' width='2' height='2' fill='%23ff4fd8'/><rect x='172' y='104' width='4' height='4' fill='%239b7bff'/><rect x='276' y='252' width='4' height='4' fill='%239b7bff'/><rect x='408' y='112' width='4' height='4' fill='%239b7bff'/><rect x='200' y='160' width='4' height='4' fill='%23ffffff'/><rect x='400' y='60' width='6' height='6' fill='%2338c8ff'/><rect x='196' y='300' width='4' height='4' fill='%23ffffff'/><rect x='0' y='248' width='2' height='2' fill='%2338c8ff'/><rect x='456' y='140' width='4' height='4' fill='%239b7bff'/><rect x='204' y='280' width='4' height='4' fill='%23ffffff'/><rect x='288' y='108' width='4' height='4' fill='%2338c8ff'/><rect x='240' y='224' width='6' height='6' fill='%2338c8ff'/><rect x='356' y='240' width='2' height='2' fill='%2338c8ff'/><rect x='112' y='136' width='4' height='4' fill='%23ff4fd8'/><rect x='104' y='120' width='2' height='2' fill='%23ffffff'/><rect x='412' y='284' width='6' height='6' fill='%23ffd166'/><rect x='392' y='8' width='4' height='4' fill='%2338c8ff'/><rect x='188' y='252' width='4' height='4' fill='%239b7bff'/><rect x='164' y='12' width='4' height='4' fill='%23ffffff'/><rect x='264' y='196' width='4' height='4' fill='%23ff4fd8'/><rect x='408' y='276' width='2' height='2' fill='%2338c8ff'/><rect x='336' y='36' width='4' height='4' fill='%23ff4fd8'/><rect x='92' y='140' width='6' height='6' fill='%239b7bff'/></svg>"),
+    linear-gradient(#0a0824 0 52%, #1a0d55 52% 64%, #3a1180 64% 74%, #7a1a9c 74% 82%, #c9259f 82% 90%, #ff4fd8 90% 100%);
+  --panel-img: none; --scan: .22; --text-glow: 0 0 6px rgba(255, 79, 216, .35); --caps: uppercase;
+  color-scheme: dark;
+}
+
+/* Synthwave grid floor */
+:root:is([data-theme="neon"], [data-theme="arcade"]) body::after {
+  content: ""; position: fixed; left: -50%; right: -50%; bottom: 0; height: 48vh; z-index: -1; pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 69, 221, .55) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgba(0, 240, 255, .45) 0 1px, transparent 1px 42px);
+  transform: perspective(320px) rotateX(62deg); transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent);
+  mask-image: linear-gradient(to top, #000 10%, transparent);
+}
+
+/* Glow would muddy dark text sitting on an accent fill. */
+.btn.primary, .ms.on, .play-btn { text-shadow: none; }
+
+/* Gold themes: gilded controls and lettering. */
+:root:is([data-theme="palace"], [data-theme="goldleaf"]) :is(.btn.primary, .play-btn, .segmented [aria-checked="true"]) {
+  background: var(--metal); color: var(--metal-ink); box-shadow: var(--metal-glow);
+}
+:root:is([data-theme="palace"], [data-theme="goldleaf"]) :is(.page-header h1, .player-title h1) {
+  background: var(--metal-text);
+  -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none;
+}
+:root:is([data-theme="palace"], [data-theme="goldleaf"]) :is(.track, .yt-row, .modal-card, .device) { box-shadow: var(--gilt-edge); }
+
+/* Golden Palace: sparks rising through the hall. */
+:root[data-theme="palace"] body::after {
+  content: ""; position: fixed; left: 0; right: 0; top: 0; bottom: -360px; z-index: -1; pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 18%, #ffd97a 0 1.5px, transparent 3px),
+    radial-gradient(circle at 34% 72%, #ffcf5f 0 1px, transparent 2.5px),
+    radial-gradient(circle at 47% 31%, #fff0b5 0 1px, transparent 2.5px),
+    radial-gradient(circle at 63% 88%, #ffc44d 0 2px, transparent 4px),
+    radial-gradient(circle at 78% 44%, #ffd97a 0 1px, transparent 2.5px),
+    radial-gradient(circle at 91% 12%, #fff0b5 0 1.5px, transparent 3px);
+  /* Different widths keep the sparks from lining up; heights divide 360px so the drift loops cleanly. */
+  background-size: 617px 360px, 431px 360px, 293px 180px, 719px 360px, 523px 120px, 887px 360px;
+  animation: palace-sparks 48s linear infinite; will-change: transform;
+}
+.theme-card[data-theme="palace"] { background: linear-gradient(160deg, #33261a, #14100b); }
+@keyframes palace-sparks { to { transform: translateY(-360px); } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="palace"] body::after { animation: none; }
+}
+
+/* Arcade: chunky pixel corners and hard neon shadows, no soft curves anywhere. */
+:root[data-theme="arcade"] body { font-size: 15px; -webkit-font-smoothing: none; }
+:root[data-theme="arcade"] .main { background: linear-gradient(rgba(10, 8, 36, .82) 0 52%, transparent 52%); }
+:root[data-theme="arcade"] #song-list .song-row:not(.head), .theme-card[data-theme="arcade"] { background: #0a0824; }
+:root[data-theme="arcade"] .brand-name { font-size: 15px; color: var(--accent); text-shadow: none; }
+:root[data-theme="arcade"] .page-header h1 { font-size: 20px; color: var(--accent); text-shadow: 3px 3px 0 #38c8ff; }
+:root[data-theme="arcade"] .player-title h1 { font-size: 15px; line-height: 1.5; color: #ffd166; text-shadow: 2px 2px 0 #c9259f; }
+:root[data-theme="arcade"] :is(h2, .modal-card h3, .section-title) { font-size: 11px; line-height: 1.6; color: #38c8ff; }
+:root[data-theme="arcade"] .btn { border: none; box-shadow: 0 -3px 0 var(--border), 0 3px 0 var(--border), -3px 0 0 var(--border), 3px 0 0 var(--border); }
+:root[data-theme="arcade"] .btn.ghost:hover { background: var(--panel-3); color: #38c8ff; }
+:root[data-theme="arcade"] .btn.primary { box-shadow: 0 -3px 0 #ff9de9, -3px 0 0 #ff9de9, 3px 0 0 #a81c8e, 0 3px 0 #a81c8e, 6px 6px 0 #38c8ff; }
+:root[data-theme="arcade"] .btn.primary:hover { filter: none; background: #38c8ff; }
+:root[data-theme="arcade"] :is(.track, .yt-row, .modal-card, .device, .theme-card) { box-shadow: 4px 4px 0 rgba(56, 200, 255, .55); }
+:root[data-theme="arcade"] .theme-card[aria-checked="true"] { box-shadow: 0 0 0 3px var(--accent), 6px 6px 0 #38c8ff; }
+:root[data-theme="arcade"] .nav-item.active { background: var(--accent); color: var(--accent-ink); text-shadow: none; }
+:root[data-theme="arcade"] .play-btn { border-radius: 0; background: #ffd166; color: #14042e; box-shadow: 4px 4px 0 #c9259f; }
+:root[data-theme="arcade"] :is(.icon-btn, .ms, .stem-icon, .cover, .chip-dot, .spinner) { border-radius: 0; }
+:root[data-theme="arcade"] :is(.range, .status .bar, .upload-progress) { border-radius: 0; height: 6px; }
+:root[data-theme="arcade"] .range::-webkit-slider-thumb { border-radius: 0; width: 10px; height: 16px; background: #ffd166; }
+:root[data-theme="arcade"] .range::-moz-range-thumb { border-radius: 0; width: 10px; height: 16px; background: #ffd166; }
+:root[data-theme="arcade"] .key-name { color: #38c8ff; }
+:root[data-theme="arcade"] .wave canvas { image-rendering: pixelated; }
+:root[data-theme="arcade"] ::selection { background: var(--accent); color: var(--accent-ink); }
