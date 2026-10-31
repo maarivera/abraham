@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abraham</title>
+  <link rel="icon" type="image/png" href="/static/logo.svg">
+  <script>
+    // Apply the saved theme before the page draws (no flash of the default theme).
+    try { document.documentElement.dataset.theme = localStorage.getItem("abraham.theme") || "abraham"; } catch {}
+  </script>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/themes.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="#/">
+        <span class="brand-mark"></span>
+        <span class="brand-name">Abraham</span>
+      </a>
+      <nav>
+        <a class="nav-item active" href="#/">
+          <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          My Songs
+        </a>
+        <a class="nav-item" href="#/youtube">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg>
+          YouTube Audio
+        </a>
+        <a class="nav-item" href="#/study">
+          <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h14v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h14v-4"/><path d="M10 8v5"/><circle cx="8.5" cy="13" r="1.5"/><path d="M10 8l5-1v5"/><circle cx="13.5" cy="12" r="1.5"/></svg>
+          Study
+        </a>
+        <a class="nav-item" href="#/settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>
+          Settings
+        </a>
+      </nav>
+      <button class="btn primary sidebar-upload" data-action="upload">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Upload
+      </button>
+      <div class="device" id="device">Detecting hardware…</div>
+    </aside>
+
+    <main class="main">
+      <!-- Library -->
+      <section id="library-view" class="view">
+        <header class="page-header">
+          <h1>My Songs</h1>
+          <div class="header-actions">
+            <div class="search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="search" type="search" placeholder="Search songs">
+            </div>
+            <button class="btn primary" data-action="upload">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Upload
+            </button>
+          </div>
+        </header>
+        <div class="song-table">
+          <div class="song-row head">
+            <span></span><span>Title</span><span>Separation</span><span>Duration</span><span>Status</span><span>Added</span><span></span>
+          </div>
+          <div id="song-list"></div>
+        </div>
+        <div id="empty" class="empty hidden">
+          <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
+          <h2>Drop your first song here</h2>
+          <p>MP3, WAV, FLAC, M4A, OGG… We'll split it into vocals, drums, bass, guitar, piano and more.</p>
+          <button class="btn primary" data-action="upload">Upload songs</button>
+        </div>
+      </section>
+
+      <!-- YouTube Audio -->
+      <section id="youtube-view" class="view hidden">
+        <header class="page-header"><h1>YouTube Audio</h1></header>
+        <div class="page-body">
+          <form id="yt-form" class="yt-form" novalidate>
+            <input id="yt-url" type="text" placeholder="Paste a YouTube link" autocomplete="off" spellcheck="false">
+            <div id="yt-quality" class="segmented" role="radiogroup" aria-label="Audio quality"></div>
+            <button class="btn primary" id="yt-submit" type="submit" disabled>
+              <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> Download
+            </button>
+          </form>
+          <p class="hint">WAV is the highest quality: it keeps everything in YouTube's audio with no further loss, which also suits separation, at about 10 MB per minute. YouTube's audio is about 128–160 kbps, so higher MP3 settings make a bigger file, not better sound. Only download audio you have the right to use.</p>
+          <div id="yt-list" class="yt-list"></div>
+          <div id="yt-empty" class="empty hidden">
+            <div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg></div>
+            <h2>No downloads yet</h2>
+            <p>Paste a link above. Your audio stays here, ready to save or split into stems.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Study -->
+      <section id="study-view" class="view hidden">
+        <header class="page-header"><h1>Study</h1></header>
+        <div class="page-body">
+          <form id="study-form" class="study-form" novalidate>
+            <label>Song <select id="study-song"></select></label>
+            <label>Track <select id="study-stem"></select></label>
+            <div class="study-field">Sheet <div id="study-mode" class="segmented" role="radiogroup" aria-label="Sheet"></div></div>
+            <div class="study-field" id="study-tuning-field">Tuning <div id="study-tuning" class="segmented" role="radiogroup" aria-label="Guitar tuning"></div></div>
+            <button class="btn primary" id="study-submit" type="submit">Generate</button>
+          </form>
+          <p class="hint">Sheets are transcribed by ear from the separated track, so treat them as a draft to check against the recording. They're written in 4/4 on a 16th-note grid, so triplets and other time signatures will come out approximate. Clean, single-instrument tracks work best. Every view plays back with a synth, not the recording. Guitar Pro shows notation and tab together. Tab frets are for the tuning you pick; notation always shows the notes as they sound.</p>
+          <div id="study-empty" class="empty hidden">
+            <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+            <h2>No songs to study yet</h2>
+            <p>Separate a song in My Songs, then come back to write out its parts.</p>
+          </div>
+          <div id="study-result" class="hidden">
+            <div id="gp-view">
+              <div class="gp-bar">
+                <button class="btn ghost" id="gp-play" type="button">Play</button>
+                <button class="btn ghost" id="gp-stop" type="button">Stop</button>
+                <label>Speed
+                  <select id="gp-speed">
+                    <option value="0.5">50%</option><option value="0.75">75%</option><option value="1" selected>100%</option><option value="1.25">125%</option>
+                  </select>
+                </label>
+                <button class="btn ghost" id="gp-metronome" type="button" aria-pressed="false">Metronome</button>
+                <button class="btn ghost" id="gp-count-in" type="button" aria-pressed="false">Count-in</button>
+                <button class="btn ghost" id="gp-loop" type="button" aria-pressed="false" title="Drag across bars to choose what loops">Loop</button>
+                <button class="btn ghost" id="gp-zoom-out" type="button" aria-label="Zoom out">−</button>
+                <button class="btn ghost" id="gp-zoom-in" type="button" aria-label="Zoom in">+</button>
+                <span id="gp-time" class="muted">0:00 / 0:00</span>
+                <span id="gp-status" class="muted"></span>
+                <span class="gp-files">
+                  <button class="btn ghost" id="study-print" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3"/><rect x="7" y="14" width="10" height="7"/></svg> Print
+                  </button>
+                  <button class="btn ghost" id="study-pdf" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> Save PDF
+                  </button>
+                  <button class="btn primary" id="gp-save" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> Save .gp
+                  </button>
+                </span>
+              </div>
+              <div id="gp-score" class="gp-score"><div id="gp-render"></div></div>
+            </div>
+            <article id="sheet" class="sheet">
+              <h2 id="sheet-title"></h2>
+              <p id="sheet-details"></p>
+              <div id="sheet-music"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings-view" class="view hidden">
+        <header class="page-header"><h1>Settings</h1></header>
+        <div class="page-body">
+          <h3 class="section-title">Theme</h3>
+          <div id="theme-grid" class="theme-grid" role="radiogroup" aria-label="Theme"></div>
+        </div>
+      </section>
+
+      <!-- Player -->
+      <section id="player-view" class="view hidden">
+        <header class="player-header">
+          <a class="icon-btn" href="#/" title="Back to library">
+            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+          </a>
+          <div class="player-title">
+            <h1 id="player-title"></h1>
+            <span id="player-sub" class="muted"></span>
+            <span id="song-key-name" class="key-name hidden"></span>
+          </div>
+          <div class="header-actions">
+            <button class="btn ghost" id="reset-mix" title="Reset all volumes, mutes, solos and keys">Reset mix</button>
+            <button class="btn ghost" id="export-mix">
+              <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> Export mix
+            </button>
+            <a class="btn primary" id="download-zip">
+              <svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg> All stems
+            </a>
+          </div>
+        </header>
+
+        <div class="tracks-wrap">
+          <div id="tracks" class="tracks"></div>
+          <div id="tracks-loading" class="tracks-loading hidden">
+            <div class="spinner"></div><span id="loading-text">Loading stems…</span>
+          </div>
+        </div>
+
+        <footer class="transport">
+          <div class="transport-left">
+            <span id="time-cur" class="time">0:00</span>
+            <div class="key" id="song-key" title="Transpose every track at once">
+              <span class="key-label">Song key</span>
+              <button class="ms" id="key-down" title="Down a semitone">−</button>
+              <span class="key-val" id="song-key-val">0</span>
+              <button class="ms" id="key-up" title="Up a semitone">+</button>
+            </div>
+          </div>
+          <div class="transport-center">
+            <div class="transport-buttons">
+              <button class="icon-btn" id="loop" title="Loop (L)">
+                <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>
+              </button>
+              <button class="icon-btn" id="back5" title="Back 5s (←)">
+                <svg viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+              </button>
+              <button class="play-btn" id="play" title="Play / pause (Space)">
+                <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+              </button>
+              <button class="icon-btn" id="fwd5" title="Forward 5s (→)">
+                <svg viewBox="0 0 24 24"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+              </button>
+              <button class="icon-btn" id="to-start" title="Back to start (Home)">
+                <svg viewBox="0 0 24 24"><path d="M6 5v14M18 6l-9 6 9 6z"/></svg>
+              </button>
+            </div>
+            <input id="seek" class="range seek" type="range" min="0" max="1000" value="0" step="1">
+          </div>
+          <div class="transport-right">
+            <span id="time-total" class="time muted">0:00</span>
+            <div class="master">
+              <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              <input id="master" class="range" type="range" min="0" max="100" value="100">
+            </div>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <!-- Upload modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <header>
+        <h2>Upload songs</h2>
+        <button class="icon-btn" data-action="close-modal"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </header>
+      <label class="dropzone" id="dropzone">
+        <input id="file-input" type="file" accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.opus,.aac,.aiff" multiple hidden>
+        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <strong>Drag & drop audio files</strong>
+        <span class="muted">or click to browse</span>
+      </label>
+      <ul id="file-list" class="file-list"></ul>
+      <h3>Separation type</h3>
+      <div id="model-options" class="model-options"></div>
+      <div id="upload-progress" class="upload-progress hidden"><div></div></div>
+      <footer>
+        <button class="btn ghost" data-action="close-modal">Cancel</button>
+        <button class="btn primary" id="submit-upload" disabled>Separate</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Separate a download -->
+  <div id="separate-modal" class="modal hidden">
+    <div class="modal-card">
+      <header>
+        <h2 id="separate-title">Separate</h2>
+        <button class="icon-btn" data-action="close-separate"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </header>
+      <h3>Separation type</h3>
+      <div id="separate-options" class="model-options"></div>
+      <footer>
+        <button class="btn ghost" data-action="close-separate">Cancel</button>
+        <button class="btn primary" id="submit-separate">Separate</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="drop-overlay" class="drop-overlay hidden"><div>Drop songs to upload</div></div>
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/vendor/alphatab/alphaTab.min.js"></script>
+  <script src="/static/vendor/vexflow.js"></script>
+  <script src="/static/vendor/jspdf.umd.min.js"></script>
+  <script src="/static/vendor/svg2pdf.umd.min.js"></script>
+  <script src="/static/sheet.js"></script>
+  <script src="/static/guitarpro.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
