@@ -11,6 +11,7 @@ import torch
 import torchaudio
 
 MODEL = Path(__file__).parent / "models" / "nmp.onnx"
+ANALYSIS_VERSION = 2  # raise when the same audio would give different notes or beats, so saved ones are redone
 
 RATE = 22050
 HOP = 256
@@ -24,6 +25,12 @@ ONSET_THRESHOLD = 0.5
 FRAME_THRESHOLD = 0.3
 MIN_NOTE_FRAMES = 5  # about 60 ms
 ENERGY_TOLERANCE = 11
+CLEAR_ONSET = 0.75  # above this an onset is a real attack, whatever else is sounding
+RINGING = 0.3  # a pitch this active just before an onset was already sounding
+MIN_BPM, MAX_BPM = 55, 200
+KICK_BAND = (0, 150)  # Hz
+SNARE_BAND = (200, 3000)
+BACKBEAT_RATIO = 1.5  # how much more a true beat length's multiple must repeat than its neighbours
 
 SLOTS_PER_BEAT = 4
 BEATS_PER_BAR = 4
@@ -81,6 +88,9 @@ def transcribe(audio: np.ndarray, low: int, high: int) -> list[list]:
     energy = frames.copy()
     notes = []
     for start, key in reversed(np.argwhere(peaks)):  # last first, so each note ends before the next one takes the energy
+        # The model half-fires on ringing strings at each new pick. Skipped here, the ringing note runs on through it.
+        if onsets[start, key] < CLEAR_ONSET and frames[max(start - 6, 0):max(start - 2, 1), key].mean() >= RINGING:
+            continue
         i, below = start + 1, 0
         while i < len(energy) - 1 and below < ENERGY_TOLERANCE:
             below = below + 1 if energy[i, key] < FRAME_THRESHOLD else 0
@@ -96,25 +106,24 @@ def transcribe(audio: np.ndarray, low: int, high: int) -> list[list]:
     return sorted(notes)
 
 
-def onset_strength(audio: np.ndarray, low_only: bool = False) -> np.ndarray:
+def onset_strength(audio: np.ndarray, band: tuple[float, float] = (0, RATE / 2)) -> np.ndarray:
     n_fft = 1024
     spec = torch.stft(
         torch.from_numpy(audio), n_fft, HOP, window=torch.hann_window(n_fft), return_complex=True
     ).abs().log1p()
-    if low_only:
-        spec = spec[:int(150 / RATE * n_fft) + 1]
+    spec = spec[int(band[0] / RATE * n_fft):int(band[1] / RATE * n_fft) + 1]
     flux = (spec[:, 1:] - spec[:, :-1]).clamp(min=0).sum(0).numpy()
     return flux / (flux.std() or 1)
 
 
-def find_beats(audio: np.ndarray) -> np.ndarray:
+def find_beats(audio: np.ndarray, notes: list[list]) -> np.ndarray:
     """Beat times in seconds, first beat of a bar first. Follows drift in the tempo."""
     fps = RATE / HOP
     envelope = onset_strength(audio)
     if len(envelope) < 2 * fps:
         return np.array([])
     # The tempo: the strongest repeat in the onsets, leaning towards 120 BPM.
-    lags = np.arange(int(fps * 60 / 200), int(fps * 60 / 55))
+    lags = np.arange(int(fps * 60 / MAX_BPM), int(fps * 60 / MIN_BPM))
     centred = envelope - envelope.mean()
     repeat = torch.fft.irfft(torch.fft.rfft(torch.from_numpy(centred), 2 * len(centred)).abs() ** 2).numpy()[lags]
     period = lags[np.argmax(repeat * np.exp(-0.5 * np.log2(lags / (fps / 2)) ** 2))]
@@ -133,18 +142,52 @@ def find_beats(audio: np.ndarray) -> np.ndarray:
     while i >= 0:
         path.append(i)
         i = back[i]
-    beats = np.array(path[::-1])
-    low = onset_strength(audio, low_only=True)
-    first = max(range(BEATS_PER_BAR), key=lambda n: low[beats[n::BEATS_PER_BAR].clip(max=len(low) - 1)].mean())
-    return beats[first:] * HOP / RATE
+    beats = fix_octave(np.array(path[::-1]), onset_strength(audio, SNARE_BAND))
+    low = onset_strength(audio, KICK_BAND)
+    kicks = np.array([low[beats[n::BEATS_PER_BAR].clip(max=len(low) - 1)].mean() for n in range(BEATS_PER_BAR)])
+    changes = chord_changes(beats * HOP / RATE, notes)
+    return beats[int(np.argmax(kicks / (kicks.sum() or 1) + changes)):] * HOP / RATE
+
+
+def fix_octave(beats: np.ndarray, snare: np.ndarray) -> np.ndarray:
+    """Correct beats tracked at twice or half the tempo. Both fit the onsets, but a backbeat repeats every 2 true beats."""
+    period = float(np.median(np.diff(beats)))
+    bpm = 60 * RATE / HOP / period
+    repeat = torch.fft.irfft(torch.fft.rfft(torch.from_numpy(snare - snare.mean()), 2 * len(snare)).abs() ** 2).numpy()
+
+    def at(lag: float) -> float:
+        return repeat[round(lag) - 2:round(lag) + 3].max()
+
+    steady = at(3 * period)  # what hi-hats alone give: if these beats are 8th notes, no backbeat lands on this lag
+    if bpm / 2 >= MIN_BPM and 4 * period < len(snare) / 2 and at(4 * period) - steady > BACKBEAT_RATIO * max(at(2 * period) - steady, 0):
+        hits = snare[beats.clip(max=len(snare) - 1)]
+        return beats[::2] if hits[::2].mean() > hits[1::2].mean() else beats[1::2]
+    if bpm * 2 <= MAX_BPM and at(period) > at(2 * period) / BACKBEAT_RATIO and at(period) > BACKBEAT_RATIO * at(1.5 * period):
+        return np.sort(np.concatenate([beats, (beats[1:] + beats[:-1]) // 2]))
+    return beats
+
+
+def chord_changes(beats: np.ndarray, notes: list[list]) -> np.ndarray:
+    """How much the harmony changes on each of the bar's four possible first beats, as shares that add up to 1."""
+    chroma = np.zeros((len(beats), 12))
+    for start, end, pitch, _ in notes:
+        a, b = np.searchsorted(beats, [start, end])
+        chroma[max(a - 1, 0):b, pitch % 12] += 1
+    chroma /= chroma.sum(axis=1, keepdims=True).clip(min=1)
+    change = np.zeros(len(beats))
+    for i in range(2, len(beats) - 2):
+        change[i] = np.abs(chroma[i:i + 2].mean(0) - chroma[i - 2:i].mean(0)).sum()
+    shares = np.array([change[n::BEATS_PER_BAR].mean() for n in range(BEATS_PER_BAR)])
+    return shares / (shares.sum() or 1)
 
 
 def analyse(stem: Path, drums: Path | None, low: int, high: int) -> dict:
     """The slow part of a sheet, worth keeping: {"notes", "beats"}."""
     audio = load_mono(stem)
+    notes = transcribe(audio, low, high)
     return {
-        "notes": transcribe(audio, low, high),
-        "beats": [round(float(b), 3) for b in find_beats(load_mono(drums) if drums else audio)],
+        "version": ANALYSIS_VERSION, "notes": notes,
+        "beats": [round(float(b), 3) for b in find_beats(load_mono(drums) if drums else audio, notes)],
     }
 
 

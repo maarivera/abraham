@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from separator import DEFAULT_MODEL, MAX_SEMITONES, MODELS, device_name, separate, silence_outside, stems_key, transpose_stem
-from study import DEFAULT_TUNING, TUNINGS, analyse, build_sheet, pitch_range
+from study import ANALYSIS_VERSION, DEFAULT_TUNING, TUNINGS, analyse, build_sheet, pitch_range
 from youtube import DEFAULT_QUALITY, QUALITIES, clean_error, download_audio, file_name, is_youtube_url
 
 ROOT = Path(__file__).parent
@@ -254,7 +254,9 @@ def find_analysis(song: dict, stem: str) -> dict:
     """The stem's notes and beats, worked out once and kept with the song."""
     path = song_dir(song["id"]) / "study" / f"{stem}.json"
     if path.exists():
-        return json.loads(path.read_text())
+        analysis = json.loads(path.read_text())
+        if analysis.get("version") == ANALYSIS_VERSION:
+            return analysis
     stems = song_dir(song["id"]) / "stems"
     drums = stems / "drums.wav" if "drums" in song["stems"] else None
     analysis = analyse(stems / f"{stem}.wav", drums, *pitch_range(stem))
