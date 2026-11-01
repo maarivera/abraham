@@ -14,12 +14,14 @@ const GUITAR_COLORS = ["#3ddc84", "#a3e635", "#2dd4bf", "#86efac"];
 for (const [i, color] of GUITAR_COLORS.entries()) {
   STEMS[`guitar_${i + 1}`] = { label: `Guitar ${i + 1}`, color, icon: STEMS.guitar.icon };
 }
-const STEM_ORDER = ["vocals", "drums", "bass", "guitar", "guitar_1", "guitar_2", "guitar_3", "guitar_4", "piano", "other"];
+STEMS.vocal_1 = { label: "Vocal 1", color: STEMS.vocals.color, icon: STEMS.vocals.icon };
+STEMS.vocal_2 = { label: "Vocal 2", color: "#f472b6", icon: STEMS.vocals.icon };
+const STEM_ORDER = ["vocals", "vocal_1", "vocal_2", "drums", "bass", "guitar", "guitar_1", "guitar_2", "guitar_3", "guitar_4", "piano", "other"];
 const MODEL_INFO = {
   htdemucs_6s: { title: "Vocals, Drums, Bass, Guitar, Piano, Other", note: "6 tracks", stems: ["vocals", "drums", "bass", "guitar", "piano", "other"] },
   htdemucs_ft: { title: "Vocals, Drums, Bass, Other", note: "Hi-Fi · best quality, ~4× slower", stems: ["vocals", "drums", "bass", "other"] },
   htdemucs: { title: "Vocals, Drums, Bass, Other", note: "Fast", stems: ["vocals", "drums", "bass", "other"] },
-  htdemucs_6s_guitars: { title: "Vocals, Drums, Bass, Guitar 1–4, Piano, Other", note: "Splits guitars panned apart in the mix", stems: ["vocals", "drums", "bass", "guitar_1", "guitar_2", "piano", "other"] },
+  htdemucs_6s_guitars: { title: "Vocal 1–2, Drums, Bass, Guitar 1–4, Piano, Other", note: "Splits guitars and vocals by where they sit in the stereo mix", stems: ["vocal_1", "vocal_2", "drums", "bass", "guitar_1", "guitar_2", "piano", "other"] },
 };
 
 const sortStems = (names) => [...names].sort((a, b) => STEM_ORDER.indexOf(a) - STEM_ORDER.indexOf(b));
@@ -93,6 +95,7 @@ async function refreshSongs() {
   try {
     songs = await api("/api/songs");
     renderLibrary();
+    if (!$("#study-view").classList.contains("hidden")) renderStudySongs();
   } catch (e) {
     console.error(e);
   }
@@ -242,7 +245,8 @@ $("#submit-upload").addEventListener("click", () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       closeModal();
       toast(`${pendingFiles.length} song(s) added to the queue`);
-      location.hash = "#/";
+      if (location.hash === "#/study") JSON.parse(xhr.responseText).forEach((s) => studyUploads.add(s.id));
+      else location.hash = "#/";
       refreshSongs();
     } else {
       let msg = "Upload failed";
@@ -1119,6 +1123,7 @@ const SHEET_MODES = [
 let studyMode = "gp";
 let studyTuning = null;
 let studySheet = null;
+const studyUploads = new Set();  // uploaded from Study, and still to be announced there
 
 function renderStudyChoices() {
   const buttons = (items, selected) => items
@@ -1137,13 +1142,34 @@ function renderStudyStems() {
   $("#study-stem").value = stems.includes(previous) ? previous : stems.find((s) => s.startsWith("guitar")) || stems[0] || "";
 }
 
-async function openStudy() {
-  await refreshSongs();
+function renderStudySongs() {
   const ready = songs.filter((s) => s.status === "ready");
-  const previous = $("#study-song").value;
-  $("#study-song").innerHTML = ready.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join("");
-  if (ready.some((s) => s.id === previous)) $("#study-song").value = previous;
-  $("#study-empty").classList.toggle("hidden", ready.length > 0);
+  const separating = songs.filter((s) => s.status === "queued" || s.status === "processing");
+  const select = $("#study-song");
+  const previous = select.value;
+  // This runs during every poll while a song separates; rebuilding would close an open list.
+  if ([...select.options].map((o) => o.value).join() !== ready.map((s) => s.id).join()) {
+    select.innerHTML = ready.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join("");
+    if (ready.some((s) => s.id === previous)) select.value = previous;
+  }
+  for (const song of songs.filter((s) => studyUploads.has(s.id))) {
+    if (song.status === "ready") {
+      select.value = song.id;
+      toast(`${song.title} is ready to study`);
+    } else if (song.status === "error") {
+      toast(`Separation failed: ${song.error}`, true);
+    } else {
+      continue;
+    }
+    studyUploads.delete(song.id);
+  }
+  $("#study-pending").innerHTML = separating
+    .map((s) => `<div class="yt-row"><div class="yt-text">
+        <div class="song-title" title="${esc(s.title)}">${esc(s.title)}</div>
+        ${statusCell(s)}
+      </div></div>`)
+    .join("");
+  $("#study-empty").classList.toggle("hidden", ready.length > 0 || separating.length > 0);
   $("#study-form").classList.toggle("hidden", !ready.length);
   if (!ready.length) $("#study-result").classList.add("hidden");
   renderStudyStems();
@@ -1231,8 +1257,7 @@ function route() {
   const page = PAGES[location.hash];
   showView(page || "#library-view", page ? location.hash : "#/");
   if (page === "#youtube-view") refreshDownloads();
-  if (page === "#study-view") openStudy();
-  if (!page) refreshSongs();
+  if (!page || page === "#study-view") refreshSongs();
 }
 
 async function init() {

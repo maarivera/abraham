@@ -115,10 +115,13 @@ It opens http://127.0.0.1:7860 in your browser.
   up to ±12 semitones without changing the tempo. A change takes a few seconds the first time, then
   it's saved. Set the drums back to 0 after a song-wide change, since drums rarely sound right
   pitched. Small shifts (±1 to ±4) sound the most natural. Downloads and exports use your keys.
-- **Study**: pick a song and track, then generate **Notation**, **Tablature** or **Guitar Pro**
+- **Study**: pick a song and track, or click **Upload** to add a song from here: it stays on the page and
+  is selected once it's separated. Then generate **Notation**, **Tablature** or **Guitar Pro**
   (notation and tab together), with the guitar in **Standard E**, **Eb** or **D** tuning (D is every string a whole step down, not Drop D).
   Every view can be played, printed, saved as an A4 **PDF** or saved as a **.gp** file. Sheets are transcribed by ear from the separated
   track, so treat them as a draft: they're written in 4/4 on a 16th-note grid, one staff per track.
+  The tempo is worked out from the drums' backbeat, so songs without a clear snare can read at double or half speed.
+  Tabs show the notes as recorded with no capo, so compare them with the recording rather than a chart in another key.
   Tab frets follow your tuning, while notation shows the notes as they sound. Each view is a live
   score: it plays the part with a synth and a moving cursor, with speed, metronome, count-in, loop
   (drag across bars to choose them) and zoom. **Save .gp** makes a file for Guitar Pro.
@@ -147,12 +150,17 @@ If YouTube downloads start failing, YouTube has probably changed something. Upda
 | Model         | Stems                                          | Notes                  |
 |---------------|------------------------------------------------|------------------------|
 | `htdemucs_6s` | vocals, drums, bass, guitar, piano, other      | default                |
-| `htdemucs_ft` | vocals, drums, bass, other                     | best quality, ~4x slower |
+| `htdemucs_ft` | vocals, drums, bass, other                     | cleanest drums, bass and other, ~3x slower; no separate guitar or piano |
 | `htdemucs`    | vocals, drums, bass, other                     | fastest                |
-| `htdemucs_6s_guitars` | as `htdemucs_6s`, with Guitar 1–4 | splits guitars by stereo position |
+| `htdemucs_6s_guitars` | as `htdemucs_6s`, with Vocal 1–2 and Guitar 1–4 | splits vocals and guitars by stereo position |
 
 Guitar 1–4 are numbered left to right across the stereo field. Guitars playing from the same
-position, including a mono recording, stay together in one track.
+position, including a mono recording, stay together in one track, and a quiet panned guitar can
+get its own track.
+
+Vocal 1 is whatever sits in the centre of the mix, usually the lead. Vocal 2 is everything wider,
+such as panned harmonies and stereo reverb. This isn't a true lead and backing split: harmonies
+mixed in the centre stay in Vocal 1, and vocals with almost nothing to the sides stay in one track.
 
 Model weights download automatically on first use (~80–300 MB, cached in `~/.cache/torch`).
 The command line writes to `output/<model>/<song>/`; the app keeps its songs in `library/`.
@@ -164,7 +172,7 @@ The command line writes to `output/<model>/<song>/`; the app keeps its songs in 
 | File | What it does |
 |---|---|
 | `app.py` | The web server: song library, separation and download queues, and every API the page calls, including trimmed and transposed downloads |
-| `separator.py` | Audio work: runs Demucs, splits guitars by stereo position, detects the key, transposes stems and silences trimmed sections. Also the command line tool |
+| `separator.py` | Audio work: runs Demucs, splits vocals and guitars by stereo position, detects the key, transposes stems and silences trimmed sections. Also the command line tool |
 | `study.py` | Sheet music: finds the notes and beats in a stem, then writes bars, rhythms and guitar frets for each tuning |
 | `youtube.py` | Downloads YouTube audio and saves it as MP3 or WAV |
 

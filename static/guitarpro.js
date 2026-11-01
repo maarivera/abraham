@@ -4,7 +4,7 @@
    and exports it as a .gp file. */
 
 const ALPHATAB = new URL("/static/vendor/alphatab/", location.href).href; // its worker can't use relative paths
-const GP_PROGRAMS = { bass: 33, piano: 0, vocals: 54 }; // General MIDI; anything else is a steel guitar
+const GP_PROGRAMS = { bass: 33, piano: 0, vocals: 54, vocal_1: 54, vocal_2: 54 }; // General MIDI; anything else is a steel guitar
 const GP_GUITAR = 25;
 const GP_STAVES = { notes: "Score", tab: "Tab", gp: "ScoreTab" };
 const GP_MIN_ZOOM = 0.6;

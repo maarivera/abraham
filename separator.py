@@ -29,11 +29,14 @@ MODELS = {
     "htdemucs_6s": "6 stems: vocals, drums, bass, guitar, piano, other",
     "htdemucs_ft": "4 stems, best quality: vocals, drums, bass, other (slower)",
     "htdemucs": "4 stems, fast: vocals, drums, bass, other",
-    "htdemucs_6s_guitars": "6 stems, with the guitar split by stereo position into up to 4 tracks",
+    "htdemucs_6s_guitars": "6 stems, with guitars split by stereo position into up to 4 tracks and vocals into centre and wide",
 }
 DEFAULT_MODEL = "htdemucs_6s"
 DEMUCS_MODEL = {"htdemucs_6s_guitars": "htdemucs_6s"}  # options that build on another model
 MAX_GUITARS = 4
+MIN_GUITAR_SHARE = 0.1  # of the loudest stereo position; a quieter guitar panned on its own still gets a track
+MIN_WIDE_VOCALS = 0.05  # share of the vocals' energy away from the centre worth its own track
+CENTRE_WIDTH = 0.2  # of the stereo field, either side of the middle
 OUTPUT_DIR = Path(__file__).parent / "output"
 PEAKS_PER_STEM = 1200
 MAX_SEMITONES = 12
@@ -158,7 +161,7 @@ def split_by_pan(audio: np.ndarray, max_parts: int = MAX_GUITARS) -> list[np.nda
     centers = np.linspace(-1, 1, bins)
     peaks = [
         i for i in range(bins)
-        if smooth[i] >= smooth[max(i - 1, 0):i + 2].max() and smooth[i] > smooth.max() * 0.25
+        if smooth[i] >= smooth[max(i - 1, 0):i + 2].max() and smooth[i] > smooth.max() * MIN_GUITAR_SHARE
     ]
     chosen: list[int] = []
     for i in sorted(peaks, key=lambda i: -smooth[i]):
@@ -177,6 +180,26 @@ def split_by_pan(audio: np.ndarray, max_parts: int = MAX_GUITARS) -> list[np.nda
     # Rounding aside, parts already sum to the input; give any remainder to the first.
     parts[0] = parts[0] + (audio - sum(parts))
     return parts
+
+
+def split_vocals(audio: np.ndarray) -> list[np.ndarray]:
+    """Split stereo (2, samples) vocals into the centre, usually the lead, and everything wider.
+
+    The two sum back to `audio`. Returns just `audio` when almost nothing sits away from the centre.
+    """
+    n_fft, hop = 4096, 1024
+    if audio.shape[1] < n_fft:
+        return [audio]
+    wav = torch.from_numpy(audio.astype(np.float32))
+    window = torch.hann_window(n_fft)
+    spec = torch.stft(wav, n_fft, hop, window=window, return_complex=True)
+    left, right = spec.abs()
+    pan = 4 / np.pi * torch.atan2(right, left + 1e-12) - 1
+    centre = torch.istft(spec * torch.exp(-((pan / CENTRE_WIDTH) ** 2)), n_fft, hop, window=window, length=wav.shape[-1]).numpy()
+    wide = audio - centre
+    if (wide**2).sum() < MIN_WIDE_VOCALS * (audio**2).sum():
+        return [audio]
+    return [centre, wide]
 
 
 # Sha'ath key profiles, from C. They suit pop and rock better than the classical-music ones.
@@ -280,6 +303,10 @@ def separate(
         if len(parts) > 1:
             tracks = {k: v for k, v in tracks.items() if k != "guitar"}
             tracks.update({f"guitar_{i}": part for i, part in enumerate(parts, 1)})
+        parts = split_vocals(tracks["vocals"])
+        if len(parts) > 1:
+            tracks = {k: v for k, v in tracks.items() if k != "vocals"}
+            tracks.update({f"vocal_{i}": part for i, part in enumerate(parts, 1)})
 
     dest_dir.mkdir(parents=True, exist_ok=True)
     stems = {}

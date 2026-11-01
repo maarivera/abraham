@@ -95,8 +95,16 @@
 
       <!-- Study -->
       <section id="study-view" class="view hidden">
-        <header class="page-header"><h1>Study</h1></header>
+        <header class="page-header">
+          <h1>Study</h1>
+          <div class="header-actions">
+            <button class="btn primary" data-action="upload">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Upload
+            </button>
+          </div>
+        </header>
         <div class="page-body">
+          <div id="study-pending" class="yt-list"></div>
           <form id="study-form" class="study-form" novalidate>
             <label>Song <select id="study-song"></select></label>
             <label>Track <select id="study-stem"></select></label>
@@ -108,7 +116,8 @@
           <div id="study-empty" class="empty hidden">
             <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
             <h2>No songs to study yet</h2>
-            <p>Separate a song in My Songs, then come back to write out its parts.</p>
+            <p>Upload a song and it'll be ready here once it's separated. Choose a type with Guitar in its name for guitar tabs.</p>
+            <button class="btn primary" data-action="upload">Upload songs</button>
           </div>
           <div id="study-result" class="hidden">
             <div id="gp-view">
